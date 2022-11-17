@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:simple_mobile/pages/login_page.dart';
 import 'package:simple_mobile/pages/my_home_state_page.dart';
+import 'package:simple_mobile/pages/register_page.dart';
 
 import 'pages/my_home_page.dart';
 import 'pages/my_river_page.dart';
@@ -35,7 +37,13 @@ class MyApp extends StatelessWidget {
       ),
       // home: MyHomePage(),
       // home: MyHomeState(),
-      home: MyRiverPage(),
+      // home: MyRiverPage(),
+      // home: LoginPage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
+      },
     );
   }
 }
