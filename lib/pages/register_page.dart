@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:simple_mobile/states/api_provider.dart';
 
 import '../widgets/row_space.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   @override
-  State<StatefulWidget> createState() {
+  ConsumerState<ConsumerStatefulWidget> createState() {
     return Register();
   }
 }
 
-class Register extends State<RegisterPage> {
+class Register extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   var sex = 1;
   var isSubscribe = false;
@@ -23,6 +27,10 @@ class Register extends State<RegisterPage> {
 
   var province = "-";
   var dobControler = TextEditingController();
+  var _name = TextEditingController();
+  var _code = TextEditingController();
+  var _email = TextEditingController();
+  var _pwd = TextEditingController();
 
   @override
   Widget build(Object context) {
@@ -32,25 +40,35 @@ class Register extends State<RegisterPage> {
       ),
       body: Form(
         key: _formKey,
-        child: Container(
-          margin: EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              nameInput(),
-              const RowSpace(),
-              sexInput(),
-              const RowSpace(),
-              subscribeInput(),
-              const RowSpace(),
-              ageInput(),
-              const RowSpace(),
-              provinceInput(),
-              const RowSpace(),
-              dobInput(),
-              const RowSpace(),
-              registerBtn(),
-            ],
+        child: SingleChildScrollView(
+          child: Container(
+            margin: EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                codeInput(),
+                const RowSpace(),
+                nameInput(),
+                const RowSpace(),
+                emailInput(),
+                const RowSpace(),
+                pwdInput(),
+                const RowSpace(),
+                sexInput(),
+                const RowSpace(),
+                subscribeInput(),
+                const RowSpace(),
+                ageInput(),
+                const RowSpace(),
+                provinceInput(),
+                const RowSpace(),
+                dobInput(),
+                const RowSpace(),
+                registerBtn(),
+                const RowSpace(),
+                imageInputBtn(),
+              ],
+            ),
           ),
         ),
       ),
@@ -60,14 +78,36 @@ class Register extends State<RegisterPage> {
   ElevatedButton registerBtn() {
     return ElevatedButton(
       onPressed: () {
-        if (_formKey.currentState!.validate()) {}
+        if (_formKey.currentState!.validate()) {
+          onRegister();
+        } else {
+          // TODO: show warning
+        }
       },
       child: Text("Register"),
     );
   }
 
+  void onRegister() async {
+    var register = {};
+    register["code"] = _code.text;
+    register["name"] = _name.text;
+    register["email"] = _email.text;
+    register["pwd"] = _pwd.text;
+    try {
+      var dio = ref.read(apiProvider);
+      var resp = await dio.post("/register", data: register);
+      var respData = resp.data;
+      Navigator.of(context).pop();
+    } catch (e) {
+      // TODO: show error
+      print(e.toString());
+    }
+  }
+
   TextFormField nameInput() {
     return TextFormField(
+      controller: _name,
       decoration: InputDecoration(
         label: Text("Name"),
       ),
@@ -78,6 +118,70 @@ class Register extends State<RegisterPage> {
         if (value.length < 5) {
           return "Name must be > 5";
         }
+      }),
+    );
+  }
+
+  TextFormField codeInput() {
+    return TextFormField(
+      controller: _code,
+      decoration: const InputDecoration(
+        label: Text("Code"),
+      ),
+      validator: ((value) {
+        if (value!.isEmpty) {
+          return "Please input code";
+        }
+        if (value.length > 5) {
+          return "Name must be < 5";
+        }
+      }),
+    );
+  }
+
+  TextFormField emailInput() {
+    return TextFormField(
+      controller: _email,
+      decoration: const InputDecoration(
+        label: Text("EMail"),
+      ),
+      validator: ((value) {
+        if (value!.isEmpty) {
+          return "Please input email";
+        }
+      }),
+    );
+  }
+
+  TextFormField pwdInput() {
+    return TextFormField(
+      controller: _pwd,
+      obscureText: true,
+      decoration: const InputDecoration(
+        label: Text("Password"),
+      ),
+      validator: ((value) {
+        if (value!.isEmpty) {
+          return "Please input password";
+        }
+      }),
+    );
+  }
+
+  TextFormField pwdConfirmInput() {
+    return TextFormField(
+      obscureText: true,
+      decoration: const InputDecoration(
+        label: Text("Confirm Password"),
+      ),
+      validator: ((value) {
+        if (value!.isEmpty) {
+          return "Please input re-password";
+        }
+        if (value != _pwd.text) {
+          return "Password mismatch !!!";
+        }
+        return null;
       }),
     );
   }
@@ -168,17 +272,6 @@ class Register extends State<RegisterPage> {
   }
 
   Widget dobInput() {
-    // return ElevatedButton(
-    //     onPressed: () async {
-    //       var now = DateTime.now();
-    //       var result = await showDatePicker(
-    //         context: context,
-    //         initialDate: now,
-    //         firstDate: now,
-    //         lastDate: DateTime(now.year + 10),
-    //       );
-    //     },
-    //     child: Text("DOB"));
     return TextFormField(
       controller: dobControler,
       decoration: InputDecoration(
@@ -190,13 +283,27 @@ class Register extends State<RegisterPage> {
             var result = await showDatePicker(
               context: context,
               initialDate: now,
-              firstDate: now,
+              firstDate: DateTime(now.year - 100),
               lastDate: DateTime(now.year + 10),
             );
-            dobControler.text = result.toString();
+            var df = DateFormat("dd/MM/yyyy");
+            dobControler.text = df.format(result!);
           },
         ),
       ),
+    );
+  }
+
+  imageInput() async {
+    var img = await ImagePicker.platform.getImage(source: ImageSource.camera);
+  }
+
+  Widget imageInputBtn() {
+    return ElevatedButton(
+      onPressed: () {
+        imageInput();
+      },
+      child: const Text("Browse Image"),
     );
   }
 }
