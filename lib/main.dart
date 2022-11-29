@@ -3,9 +3,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:simple_mobile/pages/login_page.dart';
 import 'package:simple_mobile/pages/my_home_state_page.dart';
 import 'package:simple_mobile/pages/register_page.dart';
+import 'package:simple_mobile/pages/user_page.dart';
 
+import 'pages/main_page.dart';
 import 'pages/my_home_page.dart';
 import 'pages/my_river_page.dart';
+import 'pages/user_form_page.dart';
 
 void main() {
   runApp(
@@ -41,8 +44,10 @@ class MyApp extends StatelessWidget {
       // home: LoginPage(),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoginPage(),
+        '/': (context) => const MainPage(),
         '/register': (context) => RegisterPage(),
+        '/user': (context) => const UserPage(),
+        '/user-form': (context) => const UserFormPage(),
       },
     );
   }

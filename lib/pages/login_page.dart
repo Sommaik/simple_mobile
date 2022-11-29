@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:simple_mobile/states/auth_provider.dart';
 
 import '../states/api_provider.dart';
 import '../widgets/row_space.dart';
@@ -124,8 +125,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
       var dio = ref.read(apiProvider);
       var resp = await dio.post("/login", data: login);
       var respData = resp.data;
-      // TODO: riverpod manange ui state
-      print(respData["token"]);
+      dio.options.headers = {"Authorization": "Bearer ${respData['token']}"};
+      ref.read(authProvider.notifier).state = AuthEnum.authorize;
     } catch (e) {
       print(e.toString());
       // TODO: show error
